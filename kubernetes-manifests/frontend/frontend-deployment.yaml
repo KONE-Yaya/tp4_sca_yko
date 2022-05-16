@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: frontend-deployment
+  labels:
+      app: frontend
+spec:
+  selector:
+    matchLabels:
+      app: frontend
+  template:
+    metadata:
+      labels:
+        app: frontend
+    spec:
+      containers:
+        - name: frontend
+          image: "koneyayangolo/frontback-tp-sca:yko-frontend-v2"
+          imagePullPolicy: IfNotPresent
+          resources:
+            limits:
+              memory: "200Mi"
+              cpu: "700m"
+          readinessProbe:
+            tcpSocket:
+              port: 9991
+            initialDelaySeconds: 5
+            periodSeconds: 10
+          livenessProbe:
+            tcpSocket:
+              port: 9991
+            initialDelaySeconds: 15
+            periodSeconds: 20
+          env:
+            - name: server.port
+              valueFrom:
+                configMapKeyRef:
+                  name: frontend-configmap
+                  key: port
+            - name: backend.address
+              valueFrom:
+                configMapKeyRef:
+                  name: frontend-configmap
+                  key: bport
+          ports:
+          - containerPort: 9991
